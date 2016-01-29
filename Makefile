@@ -13,7 +13,7 @@ $(BIN):
 	mkdir -p $(BIN)
 
 $(BIN)/%: $(SRC)/%.cpp
-	$(CC) $< -o $@ ${LIBS}
+	$(CC) $< -o $@ $(LIBS)
 
 clean:
 	rm $(BIN)/*
