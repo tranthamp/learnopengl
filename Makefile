@@ -3,13 +3,7 @@ LIBS=-lglfw3 -lglew -framework OpenGL
 BIN=./bin
 SRC=./src
 
-PROGS=\
-    hellowindow \
-    hellotriangle \
-    hellotriangle_ebo \
-    hellotriangle_ex1 \
-    hellotriangle_ex2
-
+PROGS=$(patsubst $(SRC)/%.cpp,%,$(wildcard $(SRC)/*.cpp))
 OUTPUT=$(addprefix $(BIN)/, $(PROGS))
 
 all: $(BIN) $(OUTPUT)
