@@ -7,7 +7,8 @@ PROGS=\
     hellowindow \
     hellotriangle \
     hellotriangle_ebo \
-    hellotriangle_ex1
+    hellotriangle_ex1 \
+    hellotriangle_ex2
 
 OUTPUT=$(addprefix $(BIN)/, $(PROGS))
 
