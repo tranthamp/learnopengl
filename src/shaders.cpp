@@ -87,11 +87,9 @@ int main() {
         // Use the shader
         ourShader.Use();
 
-        // Update the triangle's color
-        GLfloat timeValue = glfwGetTime();
-        GLfloat greenValue = (sin(timeValue) / 2) + 0.5f;
-        GLint vertexColorLocation = glGetUniformLocation(ourShader.program, "ourColor");
-        glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
+        // Update the triangle's offset
+        GLint offsetLocation = glGetUniformLocation(ourShader.program, "offset");
+        glUniform3f(offsetLocation, 0.5f, 0.0, 0.0f);
 
         // Draw the triangle
         glBindVertexArray(VAO);
