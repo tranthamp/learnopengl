@@ -16,12 +16,20 @@ const GLchar* vertexShaderSource =
     "gl_Position = vec4(position.x, position.y, position.z, 1.0);\n"
     "}\n\0";
 
-const GLchar* fragmentShaderSource =
+const GLchar* fragmentShaderSourceOrange =
     "#version 330 core\n"
     "out vec4 color;\n"
     "void main()\n"
     "{\n"
     "color = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+    "}\n\0";
+
+const GLchar* fragmentShaderSourceYellow =
+    "#version 330 core\n"
+    "out vec4 color;\n"
+    "void main()\n"
+    "{\n"
+    "color = vec4(1.0f, 1.0f, 0.0f, 1.0f);\n"
     "}\n\0";
 
 //=============================================================================
@@ -73,70 +81,108 @@ int main() {
         std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
     }
 
-    // Setup the fragment shader
-    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-    glCompileShader(fragmentShader);
-    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
+    // Setup the orange fragment shader
+    GLuint fragmentShaderOrange = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragmentShaderOrange, 1, &fragmentShaderSourceOrange, NULL);
+    glCompileShader(fragmentShaderOrange);
+    glGetShaderiv(fragmentShaderOrange, GL_COMPILE_STATUS, &success);
     if (!success) {
-        glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
+        glGetShaderInfoLog(fragmentShaderOrange, 512, NULL, infoLog);
         std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
     }
 
-    // Link the shaders
-    GLuint shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
-    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+    // Setup the yellow fragment shader
+    GLuint fragmentShaderYellow = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragmentShaderYellow, 1, &fragmentShaderSourceYellow, NULL);
+    glCompileShader(fragmentShaderYellow);
+    glGetShaderiv(fragmentShaderYellow, GL_COMPILE_STATUS, &success);
     if (!success) {
-        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
+        glGetShaderInfoLog(fragmentShaderYellow, 512, NULL, infoLog);
+        std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
+    }
+
+    // Create the orange shader program
+    GLuint orangeShaderProgram = glCreateProgram();
+    glAttachShader(orangeShaderProgram, vertexShader);
+    glAttachShader(orangeShaderProgram, fragmentShaderOrange);
+    glLinkProgram(orangeShaderProgram);
+    glGetProgramiv(orangeShaderProgram, GL_LINK_STATUS, &success);
+    if (!success) {
+        glGetProgramInfoLog(orangeShaderProgram, 512, NULL, infoLog);
         std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
     }
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
 
-    GLfloat vertices[] = {
-        -0.5f, -0.5f, 0.0f, // Left
-         0.5f, -0.5f, 0.0f, // Right
-         0.0f,  0.5f, 0.0f  // Top
+    // Create the yellow shader program
+    GLuint yellowShaderProgram = glCreateProgram();
+    glAttachShader(yellowShaderProgram, vertexShader);
+    glAttachShader(yellowShaderProgram, fragmentShaderYellow);
+    glLinkProgram(yellowShaderProgram);
+    glGetProgramiv(yellowShaderProgram, GL_LINK_STATUS, &success);
+    if (!success) {
+        glGetProgramInfoLog(yellowShaderProgram, 512, NULL, infoLog);
+        std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
+    }
+
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShaderOrange);
+    glDeleteShader(fragmentShaderYellow);
+
+    GLfloat firstTriangle[] = {
+        -0.9f, -0.5f, 0.0f,
+        -0.5f,  0.5f, 0.0f,
+        -0.1f, -0.5f, 0.0f,
+    };
+    GLfloat secondTriangle[] = {
+         0.1f, -0.5f, 0.0f,
+         0.5f,  0.5f, 0.0f,
+         0.9f, -0.5f, 0.0f,
     };
 
-    GLuint VAO, VBO;
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
+    GLuint vaoArray[2], vboArray[2];
+    glGenVertexArrays(2, vaoArray);
+    glGenBuffers(2, vboArray);
 
-    glBindVertexArray(VAO);
+    // Setup the first VAO
+    glBindVertexArray(vaoArray[0]);
+    glBindBuffer(GL_ARRAY_BUFFER, vboArray[0]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(firstTriangle), firstTriangle, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+    glEnableVertexAttribArray(0);
 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
+    // Setup the second VAO
+    glBindVertexArray(vaoArray[1]);
+    glBindBuffer(GL_ARRAY_BUFFER, vboArray[1]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(secondTriangle), secondTriangle, GL_STATIC_DRAW);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
     glEnableVertexAttribArray(0);
 
     // Unbind VAO
     glBindVertexArray(0);
 
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
     float r = 0.2f, g = 0.2f, b = 0.2f, a = 1.0f;
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
 
-        // Render
         glClearColor(r, g, b, a);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        // Draw the triangle
-        glUseProgram(shaderProgram);
-        glBindVertexArray(VAO);
+        // Draw the first triangle
+        glUseProgram(orangeShaderProgram);
+        glBindVertexArray(vaoArray[0]);
         glDrawArrays(GL_TRIANGLES, 0, 3);
-        glBindVertexArray(0);
+        // Draw the second triangle
+        glUseProgram(yellowShaderProgram);
+        glBindVertexArray(vaoArray[1]);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
 
-        // Swap the screen buffers
+        glBindVertexArray(0);
         glfwSwapBuffers(window);
     }
 
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
+    glDeleteVertexArrays(2, vaoArray);
+    glDeleteBuffers(2, vboArray);
     glfwTerminate();
     return 0;
 }
