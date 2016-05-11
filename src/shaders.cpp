@@ -8,8 +8,8 @@
 #include <GLFW/glfw3.h>
 
 //=============================================================================
-const GLuint WIDTH = 800;
-const GLuint HEIGHT = 600;
+const GLuint WIDTH = 1600;
+const GLuint HEIGHT = 900;
 
 //=============================================================================
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode) {
@@ -18,7 +18,8 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 }
 
 //=============================================================================
-int main() {
+static GLFWwindow* initGraphics() {
+    // Initialize GLFW
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -30,15 +31,27 @@ int main() {
     if (window == nullptr) {
         std::cout << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
-        return -1;
+        return nullptr;
     }
     glfwMakeContextCurrent(window);
     glfwSetKeyCallback(window, key_callback);
 
+    // Initialize GLEW
     glewExperimental = GL_TRUE;
     if (glewInit() != GLEW_OK) {
         std::cout << "Failed to initialize GLEW" << std::endl;
         glfwTerminate();
+        return nullptr;
+    }
+    return window;
+}
+
+//=============================================================================
+int main() {
+
+    GLFWwindow* window = initGraphics();
+    if (window == nullptr) {
+        std::cout << "ERROR: COULD NOT CREATE WINDOW" << std::endl;
         return -1;
     }
 
@@ -74,7 +87,7 @@ int main() {
     glBindVertexArray(0);
 
     // Compile the shader program
-    Shader ourShader("src/shaders.vert", "src/shaders.frag");
+    Shader ourShader("shaders.vert", "shaders.frag");
 
     float r = 0.2f, g = 0.2f, b = 0.2f, a = 1.0f;
     while (!glfwWindowShouldClose(window)) {
@@ -89,7 +102,7 @@ int main() {
 
         // Update the triangle's offset
         GLint offsetLocation = glGetUniformLocation(ourShader.program, "offset");
-        glUniform3f(offsetLocation, 0.5f, 0.0, 0.0f);
+        glUniform3f(offsetLocation, 0.0f, 0.0, 0.0f);
 
         // Draw the triangle
         glBindVertexArray(VAO);
